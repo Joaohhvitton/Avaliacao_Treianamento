@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KPIs Executivos</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="dashboard">
+      <h1>KPIs executivos</h1>
+      <p id="status-api" class="api-status" role="status" aria-live="polite">
+        Verificando conexão com Google Sheets...
+      </p>
+
+      <section class="kpi-grid" aria-label="Resumo de KPIs">
+        <article class="kpi-card kpi-primary">
+          <h2>Média geral do treinamento</h2>
+          <p class="kpi-value" id="media-geral">0%</p>
+        </article>
+        <article class="kpi-card kpi-secondary">
+          <h2>Melhor dia (percentual)</h2>
+          <p class="kpi-value" id="melhor-dia">-</p>
+          <p class="kpi-subvalue" id="melhor-dia-percentual">-</p>
+        </article>
+        <article class="kpi-card kpi-alert">
+          <h2>Dia com maior queda</h2>
+          <p class="kpi-value" id="maior-queda-dia">-</p>
+          <p class="kpi-subvalue" id="maior-queda-percentual">-</p>
+        </article>
+        <article class="kpi-card kpi-warning">
+          <h2>Variação do melhor para o pior dia</h2>
+          <p class="kpi-value" id="variacao-melhor-pior">0%</p>
+        </article>
+      </section>
+
+      <section class="panel">
+        <h2>Evolução da Performance por Dia</h2>
+        <div class="chart-shell">
+          <svg id="line-chart" viewBox="0 0 720 220" role="img" aria-label="Gráfico de linha da evolução por dia"></svg>
+        </div>
+      </section>
+
+      <section class="grid-2">
+        <article class="panel">
+          <h2>Resumo por Dia</h2>
+          <div class="filter-row">
+            <label for="filtro-dia">Filtrar dia:</label>
+            <select id="filtro-dia" aria-label="Filtrar resumo por dia">
+              <option value="todos">Todos</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Dia</th>
+                  <th>Pont. Máxima</th>
+                  <th>Pontuação</th>
+                  <th>Média do Grupo</th>
+                  <th>Variação</th>
+                </tr>
+              </thead>
+              <tbody id="resumo-por-dia"></tbody>
+              <tfoot>
+                <tr>
+                  <th>Total Geral</th>
+                  <th id="total-maximo"></th>
+                  <th id="total-pontuacao"></th>
+                  <th id="total-media"></th>
+                  <th id="total-variacao"></th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </article>
+
+        <article class="panel">
+          <h2>Ranking Participantes</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Participante</th>
+                  <th>Média</th>
+                  <th>% de Acerto</th>
+                </tr>
+              </thead>
+              <tbody id="ranking-participantes"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <section class="panel">
+        <h2>Detalhamento por Participante e Dia</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Participante</th>
+                <th>Dia</th>
+                <th>Pont. Máxima</th>
+                <th>Pontuação</th>
+                <th>Média</th>
+                <th>% de Acerto</th>
+                <th>Classificação</th>
+              </tr>
+            </thead>
+            <tbody id="detalhamento"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
