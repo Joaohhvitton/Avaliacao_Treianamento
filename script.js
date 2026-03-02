@@ -6,6 +6,14 @@ window.APP_CONFIG = window.APP_CONFIG || {
   },
 };
 
+window.APP_CONFIG = window.APP_CONFIG || {
+  googleSheets: {
+    sheetId: "https://docs.google.com/spreadsheets/d/15s3H_uI-6pO4FQFuxJS2DkJtJqtP4tD-swBQw91waJw",
+    apiKey: "AIzaSyD9PazDh8LE7O6m76ODALpX9swQgdafgs4",
+    range: "Base!A:G",
+  },
+};
+
 const fallbackDadosPorDia = [
   { dia: "Dia 1", pontuacaoMaxima: 100, pontuacao: 660, mediaGrupo: 94.29, variacao: 0 },
   { dia: "Dia 2", pontuacaoMaxima: 110, pontuacao: 980, mediaGrupo: 98.0, variacao: 3.71 },
@@ -260,6 +268,7 @@ function renderGraficoLinha() {
   const width = 720;
   const height = 240;
   const pad = { top: 40, right: 46, bottom: 38, left: 48 };
+  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
   const values = dadosPorDia.map((item) => item.mediaGrupo);
 
   if (!values.length) {
@@ -295,10 +304,13 @@ function renderGraficoLinha() {
       const x = pad.left + i * xStep;
       const y = scaleY(v);
       const color = i < values.length - 1 ? "#3d7f53" : "#c54b4b";
+      const valorLabelX = i === 0 ? x + 14 : x;
+      const valorLabelAnchor = i === 0 ? "start" : "middle";
+
       return `
         <g class="marker-anim" style="animation-delay:${0.7 + i * 0.1}s">
           <circle cx="${x}" cy="${y}" r="5" fill="#fff" stroke="${color}" stroke-width="2" />
-          <text x="${x}" y="${Math.max(y - 12, pad.top - 4)}" text-anchor="middle" font-size="13" font-weight="700" fill="#2d3142">${formatPercent(v)}</text>
+          <text x="${valorLabelX}" y="${Math.max(y - 12, pad.top - 4)}" text-anchor="${valorLabelAnchor}" font-size="13" font-weight="700" fill="#2d3142">${formatPercent(v)}</text>
           <text x="${x}" y="${height - 10}" text-anchor="middle" font-size="13" fill="${i === values.length - 1 ? "#c54b4b" : "#2d3142"}">${dadosPorDia[i].dia}</text>
         </g>
       `;
@@ -428,7 +440,8 @@ function mapRowsToDetalhamento(rows) {
 
   return parsed.map((item) => {
     const pontMaximaDerivada = pontuacaoMaximaPorDiaPadrao[item.dia] || maxPorDia.get(item.dia) || item.pontuacao;
-    const pontMaxima = item.pontMaxima > 0 ? item.pontMaxima : pontMaximaDerivada;
+    // Regra fixa de referência por dia para evitar inconsistência no detalhamento.
+    const pontMaxima = pontMaximaDerivada;
     const acerto = item.acerto > 0 ? item.acerto : (pontMaxima > 0 ? (item.pontuacao / pontMaxima) * 100 : 0);
     const media = item.media > 0 ? item.media : acerto;
 
@@ -471,16 +484,24 @@ function buildResumoPorDiaFromDetalhamento(rows) {
 
 function buildRankingFromDetalhamento(rows) {
   const grouped = new Map();
+
+  const maximaPorDia = new Map();
   rows.forEach((item) => {
-    const curr = grouped.get(item.participante) || { nome: item.participante, pontuacaoTotal: 0, pontMaximaTotal: 0 };
+    const maxAtual = maximaPorDia.get(item.dia) || 0;
+    maximaPorDia.set(item.dia, Math.max(maxAtual, item.pontMaxima));
+  });
+  const pontuacaoMaximaPeriodo = Array.from(maximaPorDia.values()).reduce((acc, v) => acc + v, 0);
+
+  rows.forEach((item) => {
+    const curr = grouped.get(item.participante) || { nome: item.participante, pontuacaoTotal: 0 };
     curr.pontuacaoTotal += item.pontuacao;
-    curr.pontMaximaTotal += item.pontMaxima;
     grouped.set(item.participante, curr);
   });
 
   return Array.from(grouped.values())
     .map((item) => {
-      const percentualAcertoTotal = item.pontMaximaTotal > 0 ? (item.pontuacaoTotal / item.pontMaximaTotal) * 100 : 0;
+      const percentualAcertoTotal =
+        pontuacaoMaximaPeriodo > 0 ? (item.pontuacaoTotal / pontuacaoMaximaPeriodo) * 100 : 0;
       return {
         nome: item.nome,
         totalAcerto: item.pontuacaoTotal,
@@ -552,3 +573,4 @@ async function validarConexaoSheets() {
 
 rerenderDashboard();
 validarConexaoSheets();
+
