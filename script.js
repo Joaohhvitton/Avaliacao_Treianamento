@@ -14,11 +14,11 @@ const fallbackDadosPorDia = [
 ];
 
 const fallbackParticipantes = [
-  { nome: "Giselda Cecília Martins", media: 95, acerto: 95 },
-  { nome: "Nathalia Barbosa Campos", media: 90, acerto: 90 },
-  { nome: "Taymara Cristina", media: 90, acerto: 90 },
-  { nome: "Severiano Lima", media: 70, acerto: 70 },
-  { nome: "Carlos Eduardo", media: 70, acerto: 70 },
+  { nome: "Giselda Cecília Martins", totalAcerto: 95, percentualAcertoTotal: 95 },
+  { nome: "Nathalia Barbosa Campos", totalAcerto: 90, percentualAcertoTotal: 90 },
+  { nome: "Taymara Cristina", totalAcerto: 90, percentualAcertoTotal: 90 },
+  { nome: "Severiano Lima", totalAcerto: 70, percentualAcertoTotal: 70 },
+  { nome: "Carlos Eduardo", totalAcerto: 70, percentualAcertoTotal: 70 },
 ];
 
 const fallbackDetalhamento = [
@@ -229,8 +229,8 @@ function preencherRanking(participantesView = participantes) {
     tr.style.animationDelay = `${0.06 + index * 0.04}s`;
     tr.innerHTML = `
       <td>${item.nome}</td>
-      <td class="num">${formatNumber(item.media)}</td>
-      <td class="num ${classeTendencia(item.acerto - 85)}">${iconeTendencia(item.acerto - 85)} ${formatPercent(item.acerto)}</td>
+      <td class="num">${Math.round(item.totalAcerto || 0)}</td>
+      <td class="num ${classeTendencia((item.percentualAcertoTotal || 0) - 85)}">${iconeTendencia((item.percentualAcertoTotal || 0) - 85)} ${formatPercent(item.percentualAcertoTotal || 0)}</td>
     `;
     tbody.appendChild(tr);
   });
@@ -248,7 +248,6 @@ function preencherDetalhamento(detalhamentoView = detalhamento) {
       <td>${item.dia}</td>
       <td class="num">${Math.round(item.pontMaxima)}</td>
       <td class="num">${Math.round(item.pontuacao)}</td>
-      <td class="num">${formatNumber(item.media)}</td>
       <td class="num ${classeTendencia(item.acerto - 85)}">${iconeTendencia(item.acerto - 85)} ${formatPercent(item.acerto)}</td>
       <td><span class="badge ${badgeClassificacao(item.classificacao)}">${item.classificacao}</span></td>
     `;
@@ -372,9 +371,12 @@ function detectHeaderMap(headerRow) {
   return map;
 }
 
-function deriveClassificacao(acerto) {
-  if (acerto >= 85) return "Alta Performance";
-  if (acerto >= 70) return "Média Performance";
+function deriveClassificacao(acerto, pontuacao, pontMaxima) {
+  const percentual = pontMaxima > 0 ? (pontuacao / pontMaxima) * 100 : acerto;
+  const score = (Number(acerto || 0) + Number(percentual || 0)) / 2;
+
+  if (score >= 85) return "Alta Performance";
+  if (score >= 70) return "Média Performance";
   return "Baixa Performance";
 }
 
@@ -437,7 +439,7 @@ function mapRowsToDetalhamento(rows) {
       pontuacao: item.pontuacao,
       media,
       acerto,
-      classificacao: item.classificacao || deriveClassificacao(acerto),
+      classificacao: item.classificacao || deriveClassificacao(acerto, item.pontuacao, pontMaxima),
     };
   });
 }
@@ -470,20 +472,22 @@ function buildResumoPorDiaFromDetalhamento(rows) {
 function buildRankingFromDetalhamento(rows) {
   const grouped = new Map();
   rows.forEach((item) => {
-    const curr = grouped.get(item.participante) || { nome: item.participante, mediaTotal: 0, acertoTotal: 0, count: 0 };
-    curr.mediaTotal += item.media;
-    curr.acertoTotal += item.acerto;
-    curr.count += 1;
+    const curr = grouped.get(item.participante) || { nome: item.participante, pontuacaoTotal: 0, pontMaximaTotal: 0 };
+    curr.pontuacaoTotal += item.pontuacao;
+    curr.pontMaximaTotal += item.pontMaxima;
     grouped.set(item.participante, curr);
   });
 
   return Array.from(grouped.values())
-    .map((item) => ({
-      nome: item.nome,
-      media: item.count ? item.mediaTotal / item.count : 0,
-      acerto: item.count ? item.acertoTotal / item.count : 0,
-    }))
-    .sort((a, b) => b.media - a.media);
+    .map((item) => {
+      const percentualAcertoTotal = item.pontMaximaTotal > 0 ? (item.pontuacaoTotal / item.pontMaximaTotal) * 100 : 0;
+      return {
+        nome: item.nome,
+        totalAcerto: item.pontuacaoTotal,
+        percentualAcertoTotal,
+      };
+    })
+    .sort((a, b) => b.totalAcerto - a.totalAcerto);
 }
 
 async function fetchSheetRowsWithFallbackRange() {
@@ -548,3 +552,4 @@ async function validarConexaoSheets() {
 
 rerenderDashboard();
 validarConexaoSheets();
+
