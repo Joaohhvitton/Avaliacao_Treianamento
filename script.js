@@ -258,8 +258,8 @@ function preencherDetalhamento(detalhamentoView = detalhamento) {
 function renderGraficoLinha() {
   const svg = document.getElementById("line-chart");
   const width = 720;
-  const height = 220;
-  const pad = { top: 30, right: 40, bottom: 36, left: 42 };
+  const height = 240;
+  const pad = { top: 40, right: 46, bottom: 38, left: 48 };
   const values = dadosPorDia.map((item) => item.mediaGrupo);
 
   if (!values.length) {
@@ -269,14 +269,14 @@ function renderGraficoLinha() {
 
   const xStep = values.length > 1 ? (width - pad.left - pad.right) / (values.length - 1) : 0;
   const yMin = 50;
-  const yMax = 100;
+  const yMax = 102;
   const scaleY = (v) => pad.top + ((yMax - v) / (yMax - yMin)) * (height - pad.top - pad.bottom);
 
   const grid = [100, 90, 80, 70, 60, 50]
     .map((tick) => {
       const y = scaleY(tick);
       return `<line x1="${pad.left}" y1="${y}" x2="${width - pad.right}" y2="${y}" stroke="#e2e6ef" stroke-width="1" />
-              <text x="8" y="${tick === 100 ? y + 12 : y + 4}" font-size="12" fill="#6f7381">${tick}%</text>`;
+              <text x="10" y="${y + 4}" font-size="12" fill="#6f7381">${tick}%</text>`;
     })
     .join("\n");
 
@@ -298,7 +298,7 @@ function renderGraficoLinha() {
       return `
         <g class="marker-anim" style="animation-delay:${0.7 + i * 0.1}s">
           <circle cx="${x}" cy="${y}" r="5" fill="#fff" stroke="${color}" stroke-width="2" />
-          <text x="${x}" y="${y - 10}" text-anchor="middle" font-size="13" font-weight="700" fill="#2d3142">${formatPercent(v)}</text>
+          <text x="${x}" y="${Math.max(y - 12, pad.top - 4)}" text-anchor="middle" font-size="13" font-weight="700" fill="#2d3142">${formatPercent(v)}</text>
           <text x="${x}" y="${height - 10}" text-anchor="middle" font-size="13" fill="${i === values.length - 1 ? "#c54b4b" : "#2d3142"}">${dadosPorDia[i].dia}</text>
         </g>
       `;
@@ -310,7 +310,7 @@ function renderGraficoLinha() {
     ${grid}
     <polyline class="line-anim" points="${firstPoints}" fill="none" stroke="#3d7f53" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
     <polyline class="line-anim last" points="${secondPoints}" fill="none" stroke="#c54b4b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-    <line x1="${pad.left}" y1="${scaleY(77)}" x2="${width - pad.right}" y2="${scaleY(77)}" stroke="#9ea6b5" stroke-dasharray="6 6" />
+    <line x1="${pad.left}" y1="${scaleY(77)}" x2="${width - pad.right}" y2="${scaleY(77)}" stroke="#b8bcc8" stroke-dasharray="6 6" />
     ${markers}
   `;
 }
