@@ -1213,9 +1213,3 @@ async function validarConexaoSheets() {
 
 rerenderDashboard();
 validarConexaoSheets();
-
-
-
-
-
-
