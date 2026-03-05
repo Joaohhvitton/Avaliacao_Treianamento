@@ -42,6 +42,12 @@
         </div>
       </section>
 
+
+      <section class="panel">
+        <h2>Questões da Avaliação por Dia</h2>
+        <div id="questoes-por-dia" class="questions-grid" aria-label="Questões separadas por dia"></div>
+      </section>
+
       <section class="grid-2">
         <article class="panel">
           <h2>Resumo por Dia</h2>
@@ -100,11 +106,6 @@
             <thead>
               <tr>
                 <th>Participante</th>
-                <th>Dia</th>
-                <th>Pont. Máxima</th>
-                <th>Pontuação</th>
-                <th>% de Acerto</th>
-                <th>Classificação</th>
               </tr>
             </thead>
             <tbody id="detalhamento"></tbody>
@@ -113,6 +114,15 @@
       </section>
     </main>
 
+
+
+    <div id="question-modal" class="question-modal hidden" role="dialog" aria-modal="true" aria-labelledby="question-modal-title">
+      <div class="question-modal-content">
+        <button id="question-modal-close" class="question-modal-close" type="button" aria-label="Fechar popup">×</button>
+        <h3 id="question-modal-title">Questões e respostas</h3>
+        <div id="question-modal-body"></div>
+      </div>
+    </div>
     <script src="script.js"></script>
   </body>
 </html>
